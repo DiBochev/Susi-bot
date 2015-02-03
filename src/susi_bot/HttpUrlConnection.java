@@ -91,10 +91,10 @@ public class HttpUrlConnection {
 	conn.setDoInput(true);
  
 	// post request
-	DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
+	try(DataOutputStream dos = new DataOutputStream(conn.getOutputStream());){
 	dos.writeBytes(postParams);
 	dos.flush();
-	dos.close();
+	}
  
 	int responseCode = conn.getResponseCode();
 	System.out.println("Response Code : " + responseCode);
@@ -106,6 +106,5 @@ public class HttpUrlConnection {
 			response.append(inputLine);
 		}		
 	}
-//	in.close();
   }
 }
