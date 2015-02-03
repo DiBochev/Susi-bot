@@ -2,13 +2,16 @@ package susi_bot;
  
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.net.ssl.HttpsURLConnection;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -20,7 +23,7 @@ public class HttpUrlConnection {
  
   private final String USER_AGENT = "Mozilla/5.0";
   
-  String GetPageContent(String url) throws Exception {
+  String GetPageContent(String url) throws IOException {
 	  
 		URL obj = new URL(url);
 		conn = (HttpsURLConnection) obj.openConnection();
@@ -32,22 +35,24 @@ public class HttpUrlConnection {
 		conn.setRequestProperty("User-Agent", USER_AGENT);
 		int responseCode = conn.getResponseCode();
 		System.out.println("Response Code : " + responseCode);
-		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		String inputLine;
 		StringBuilder response = new StringBuilder();
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
+		
+		try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		in.close();
 		return response.toString();
 	  }
   
   public String getFormParams(String html, String username, String password) throws UnsupportedEncodingException {
 
- 
 	Document doc = Jsoup.parse(html);
  
-	// Google form id
+	//find form by id
 	Element loginform = doc.getElementById("Form1");
 	Elements inputElements = loginform.getElementsByTag("input");
 	List<String> paramList = new ArrayList<String>();
@@ -74,7 +79,7 @@ public class HttpUrlConnection {
 	return result.toString();
   }
  
-  void sendPost(String url, String postParams) throws Exception {
+  void sendPost(String url, String postParams) throws IOException{
 	  
 	URL obj = new URL(url);
 	conn = (HttpsURLConnection) obj.openConnection();
@@ -94,13 +99,13 @@ public class HttpUrlConnection {
 	int responseCode = conn.getResponseCode();
 	System.out.println("Response Code : " + responseCode);
  
-	BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 	String inputLine;
 	StringBuffer response = new StringBuffer();
- 
-	while ((inputLine = in.readLine()) != null) {
-		response.append(inputLine);
+	try(BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));){
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
+		}		
 	}
-	in.close();
+//	in.close();
   }
 }
